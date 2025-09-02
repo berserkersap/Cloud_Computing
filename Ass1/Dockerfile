@@ -5,10 +5,10 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copy the requirements file into the container
-COPY fastapi_requirements.txt .
+COPY requirements.txt .
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r fastapi_requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code into the container
 COPY fastapi_server.py .
