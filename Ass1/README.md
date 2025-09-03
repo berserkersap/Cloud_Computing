@@ -1,71 +1,70 @@
-Cloud Computing Assignment 1: Autoscaling Analysis (FastAPI Edition)
-This project uses the FastAPI framework to demonstrate and evaluate the performance of a containerized application under different loads using Docker Swarm and Kubernetes with autoscaling.
+Cloud Computing Assignment 1: Autoscaling Analysis (FASTAPI)
+This project uses the FastAPI framework to fulfill the updated assignment requirements, including specific output formats and a string reversal task.
 
 Application Overview
-Server: A Python FastAPI application that provides an API endpoint (/encode) to convert a string into its hexadecimal representation. It uses Uvicorn as the ASGI server.
+Server: A Python FastAPI application with two endpoints: /encode (for hex encoding) and /reverse (for string reversal).
 
-Client: An asynchronous Python script using aiohttp to send requests to the server at a high rate and log the response times.
+Client: An asynchronous Python script that takes the user's roll number and test parameters to generate the four required output files in the specified format.
 
 How to Run
 Prerequisites
-Docker installed
+Docker, Kubernetes (kubectl), a Docker Hub account, and Python 3.x installed.
 
-Kubernetes cluster (e.g., Minikube, GKE, EKS)
+Install client dependency: pip install aiohttp
 
-kubectl configured
+1. Build and Push the Docker Image
+Build the image using the Dockerfile-fastapi file (replace yourusername and choose a new tag like v2).
 
-A Docker Hub account
+docker build -t yourusername/cloud-app-fastapi:v2 -f Dockerfile-fastapi .
 
-Python 3.x and pip installed
-
-1. Install Client Dependencies
-The new client uses aiohttp. Install it first:
-
-pip install aiohttp
-
-2. Build and Push the Docker Image
-Navigate to the project's root directory.
-
-Build the image using the FastAPI Dockerfile (replace yourusername):
-
-docker build -t yourusername/cloud-app-fastapi:latest -f Dockerfile-fastapi .
-
-Log in to Docker Hub:
+Log in and push the image:
 
 docker login
+docker push yourusername/cloud-app-fastapi:v2
 
-Push the image:
+2. Deploy the Service
+For Docker Swarm:
 
-docker push yourusername/cloud-app-fastapi:latest
+docker service create --name hex-server-fastapi --replicas 3 -p 80:8000 yourusername/cloud-app-fastapi:v2
 
-3. Deploy on Docker Swarm
-Initialize Docker Swarm: docker swarm init
+For Kubernetes:
 
-Deploy the service (note the port change to 80:8000):
+IMPORTANT: Update fastapi_deployment.yaml to use your new image tag (e.g., yourusername/cloud-app-fastapi:v2).
 
-docker service create --name hex-server-fastapi --replicas 3 -p 80:8000 yourusername/cloud-app-fastapi:latest
-
-4. Deploy on Kubernetes
-Important: Edit fastapi_deployment.yaml and replace yourusername/cloud-app-fastapi:latest with your actual image name.
-
-Apply the Kubernetes configurations:
+Apply the configs:
 
 kubectl apply -f fastapi_deployment.yaml
 kubectl apply -f fastapi_hpa.yaml
 
-Get the external IP of the service:
+3. Run the Updated Client Tests
+Use the updated_fastapi_client.py script. It now requires 4 arguments.
 
-kubectl get service hex-encoder-fastapi-service
+Command Format:
 
-5. Run the Client Tests
-Use the fastapi_client.py script.
+python updated_fastapi_client.py <YOUR_ROLL_NUMBER> <SERVER_URL> <platform> <10|10000>
 
-For Docker Swarm (replace <DOCKER_IP>):
+Example Commands (replace with your details):
 
-python fastapi_client.py http://<DOCKER_IP>:80 10 Docker_response_10_fastapi.txt
-python fastapi_client.py http://<DOCKER_IP>:80 10000 Docker_response_10000_fastapi.txt
+Docker Swarm - 10 Strings Test:
 
-For Kubernetes (replace <K8S_EXTERNAL_IP>):
+python updated_fastapi_client.py CB.EN.U4CSE19000 http://<DOCKER_IP> dockerswarm 10
 
-python fastapi_client.py http://<K8S_EXTERNAL_IP>:80 10 kubernetes_response_10_fastapi.txt
-python fastapi_client.py http://<K8S_EXTERNAL_IP>:80 10000 kubernetes_response_10000_fastapi.txt
+This will create the file CB.EN.U4CSE19000dockerswarm10.txt
+
+Docker Swarm - 10000 RPS Test:
+
+python updated_fastapi_client.py CB.EN.U4CSE19000 http://<DOCKER_IP> dockerswarm 10000
+
+This will create the file CB.EN.U4CSE19000dockerswarm10000.txt
+
+Kubernetes - 10 Strings Test:
+
+python updated_fastapi_client.py CB.EN.U4CSE19000 http://<K8S_EXTERNAL_IP> kubernetes 10
+
+This will create the file CB.EN.U4CSE19000kubernetes10.txt
+
+Kubernetes - 10000 RPS Test:
+
+python updated_fastapi_client.py CB.EN.U4CSE19000 http://<K8S_EXTERNAL_IP> kubernetes 10000
+
+This will create the file CB.EN.U4CSE19000kubernetes10000.txt****
