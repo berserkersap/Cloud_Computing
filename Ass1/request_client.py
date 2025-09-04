@@ -8,7 +8,7 @@ import aiohttp
 # --- Configuration ---
 # Set this to the endpoint you want to test.
 # We are changing this back to hexadecimal conversion.
-ENDPOINT_TO_TEST = "/encode" 
+ENDPOINT_TO_TEST = "/reverse" 
 
 # Predefined list of 10 strings for the 10-request test, as per the sample output.
 STRINGS_FOR_10_TEST = [
