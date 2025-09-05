@@ -46,7 +46,7 @@ async def run_10_string_test(server_url, output_file):
             
             if response_json and duration > 0:
                 # The /encode endpoint returns the key "result"
-                processed_key = "result" 
+                processed_key = "reversed" 
                 processed_string = response_json.get(processed_key, "Error: Key not found")
                 results.append((original_string, processed_string, duration))
             else:
@@ -58,7 +58,7 @@ async def run_10_string_test(server_url, output_file):
     with open(output_file, 'w') as f:
         for original, processed, duration in results:
             f.write(f"Original: {original}\n")
-            f.write(f"Hexadecimal: {processed}\n")
+            f.write(f"Reversed String: {processed}\n")
             f.write("--------------------\n")
             if duration > 0:
                 total_time += duration
