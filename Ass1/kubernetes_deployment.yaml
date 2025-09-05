@@ -32,7 +32,7 @@ spec:
         - name: hex-encoder-fastapi-container
           # IMPORTANT: Replace 'yourusername' with your Docker Hub username
           # and use a new image name/tag for the FastAPI version
-          image: yourusername/cloud-app-fastapi:latest
+          image: da24c016iitm/cloud-app-fastapi:latest
           ports:
             - containerPort: 8000
           # Resource requests and limits are essential for HPA to work
