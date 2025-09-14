@@ -22,17 +22,17 @@ async def root():
     """Health check endpoint."""
     return {"message": "FastAPI server (v2) is running with /encode and /reverse endpoints"}
 
-@app.post("/encode", response_model=HexOutputData)
-async def encode_string(item: InputData):
-    """
-    Endpoint to encode a string to its hexadecimal representation.
-    """
-    try:
-        input_string = item.data
-        hex_encoded_string = codecs.encode(input_string.encode('utf-8'), 'hex').decode('utf-8')
-        return {"result": hex_encoded_string}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+# @app.post("/encode", response_model=HexOutputData)
+# async def encode_string(item: InputData):
+#     """
+#     Endpoint to encode a string to its hexadecimal representation.
+#     """
+#     try:
+#         input_string = item.data
+#         hex_encoded_string = codecs.encode(input_string.encode('utf-8'), 'hex').decode('utf-8')
+#         return {"result": hex_encoded_string}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 @app.post("/reverse", response_model=ReverseOutputData)
 async def reverse_string(item: InputData):
