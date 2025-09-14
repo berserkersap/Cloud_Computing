@@ -1,0 +1,3 @@
+average_response_time=3.646554
+requests_sent=600000
+requests_successful=600000
