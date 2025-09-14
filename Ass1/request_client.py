@@ -4,6 +4,9 @@ import sys
 import atexit
 import asyncio
 import aiohttp
+import threading
+
+
 
 # --- Configuration ---
 # Set this to the endpoint you want to test.
@@ -105,6 +108,15 @@ async def run_high_load_test(server_url, output_file, rps, duration=60):
                 f.write(f"{t:.6f}\n")
         print(f"Test complete. Average Response Time: {avg_time:.6f}s")
 
+def worker():
+    asyncio.run(run_high_load_test(full_url, output_filename, rps))
+for _ in range(4):  # 4 threads
+    t = threading.Thread(target=worker)
+    t.start()
+    threads.append(t)
+
+for t in threads:
+    t.join()
 
 
 # --- Main Execution ---
