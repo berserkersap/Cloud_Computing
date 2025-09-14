@@ -1,25 +1,11 @@
-# Service to expose the Deployment
-apiVersion: v1
-kind: Service
-metadata:
-  name: hex-encoder-fastapi-service
-spec:
-  type: LoadBalancer 
-  ports:
-    - port: 80
-      # Target port must match the container port (8000 for uvicorn)
-      targetPort: 8000
-  selector:
-    # This selector must match the labels in the Deployment
-    app: hex-encoder-fastapi
----
+
 # Deployment for the application pods
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: hex-encoder-fastapi-deployment
 spec:
-  replicas: 3
+  replicas: 3   # initial pods (HPA can scale this up to 10)
   selector:
     matchLabels:
       app: hex-encoder-fastapi
@@ -29,15 +15,29 @@ spec:
         app: hex-encoder-fastapi
     spec:
       containers:
-        - name: hex-encoder-fastapi-container
-          # IMPORTANT: Replace 'yourusername' with your Docker Hub username
-          # and use a new image name/tag for the FastAPI version
-          image: da24c016iitm/cloud-app-fastapi:latest
-          ports:
-            - containerPort: 8000
-          # Resource requests and limits are essential for HPA to work
-          resources:
-            requests:
-              cpu: "500m"
-            limits:
-              cpu: "1000m"
+      - name: hex-encoder-fastapi-container
+        image: da24c016iitm/cloud-app-fastapi:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: UVICORN_WORKERS   # control worker count inside container
+          value: "4"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hex-encoder-fastapi-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8000
+  selector:
+    app: hex-encoder-fastapi
