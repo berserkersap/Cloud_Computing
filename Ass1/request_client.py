@@ -35,35 +35,35 @@ async def send_single_request(session, url, data_payload):
 # --- Test Functions ---
 
 async def run_10_string_test(server_url, output_file):
-    """Runs the 10-string test with detailed output format."""
+    """Runs the 10-string test with detailed output format (parallel)."""
     print(f"Running 10-string test. Output will be saved to '{output_file}'")
-    results = []
-    
-    async with aiohttp.ClientSession() as session:
-        for original_string in STRINGS_FOR_10_TEST:
-            payload = {"data": original_string}
-            response_json, duration = await send_single_request(session, server_url, payload)
-            
-            if response_json and duration > 0:
-                # The /encode endpoint returns the key "result"
-                processed_key = "reversed" 
-                processed_string = response_json.get(processed_key, "Error: Key not found")
-                results.append((original_string, processed_string, duration))
-            else:
-                results.append((original_string, "Request Failed", -1.0))
 
-    # Write formatted output to the file
+    async with aiohttp.ClientSession() as session:
+        # Create coroutines for all 10 requests at once
+        tasks = [
+            send_single_request(session, server_url, {"data": original})
+            for original in STRINGS_FOR_10_TEST
+        ]
+        results = await asyncio.gather(*tasks)
+
+    # Process results
     total_time = 0
     valid_requests = 0
     with open(output_file, 'w') as f:
-        for original, processed, duration in results:
-            f.write(f"Original: {original}\n")
-            f.write(f"Reversed String: {processed}\n")
-            f.write("--------------------\n")
-            if duration > 0:
+        for original, (response_json, duration) in zip(STRINGS_FOR_10_TEST, results):
+            if response_json and duration > 0:
+                processed_key = "reversed"   # since you need reversed string now
+                processed_string = response_json.get(processed_key, "Error: Key not found")
+                f.write(f"Original: {original}\n")
+                f.write(f"Reversed: {processed_string}\n")
+                f.write("--------------------\n")
                 total_time += duration
                 valid_requests += 1
-        
+            else:
+                f.write(f"Original: {original}\n")
+                f.write(f"Reversed: Request Failed\n")
+                f.write("--------------------\n")
+
         if valid_requests > 0:
             average_time = total_time / valid_requests
             f.write(f"average_response_time={average_time:.6f}\n")
