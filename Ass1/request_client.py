@@ -71,52 +71,40 @@ async def run_10_string_test(server_url, output_file):
             f.write("average_response_time=N/A (All requests failed)\n")
     print("10-string test complete.")
 
-async def run_high_load_test(server_url, output_file, rps):
-    """
-    Runs a high-load test for a given RPS.
-    - For 10,000 RPS submission, outputs only the average time.
-    - For other RPS values, outputs every response time to a new line.
-    """
-    print(f"Running high-load test at {rps} RPS for 60 seconds. Output: '{output_file}'")
-    
-    duration = 60  # seconds
-    total_requests_to_send = rps * duration
+
+async def run_high_load_test(server_url, output_file, rps, duration=60):
+    print(f"Running high-load test at {rps} RPS for {duration} seconds. Output: '{output_file}'")
+
     payload = {"data": "high-load-test-string"}
     response_times = []
 
     async with aiohttp.ClientSession() as session:
-        tasks = []
-        # Create all tasks upfront
-        for _ in range(total_requests_to_send):
-            tasks.append(send_single_request(session, server_url, payload))
-        
-        # Gather results
-        all_results = await asyncio.gather(*tasks)
+        for second in range(duration):
+            # Launch 'rps' requests every second
+            tasks = [send_single_request(session, server_url, payload) for _ in range(rps)]
+            results = await asyncio.gather(*tasks)
 
-        # Process results to get valid durations
-        for _, duration in all_results:
-            if duration > 0:
-                response_times.append(duration)
+            for _, d in results:
+                if d > 0:
+                    response_times.append(d)
 
-    # Calculate and write the output based on the test type
+            # Sleep until next second boundary
+            await asyncio.sleep(1)
+
+    # Write results
     with open(output_file, 'w') as f:
         if not response_times:
             f.write("average_response_time=N/A (All requests failed)\n")
-            print("High-load test complete. All requests failed.")
             return
 
-        average_time = sum(response_times) / len(response_times)
-        
-        # Check if this is the specific 10,000 RPS submission case
+        avg_time = sum(response_times) / len(response_times)
         if rps == 10000:
-            f.write(f"average_response_time={average_time:.6f}\n")
-            print(f"High-load test (10000 RPS submission format) complete. Average time: {average_time:.6f}s")
+            f.write(f"average_response_time={avg_time:.6f}\n")
         else:
-            # General case: write every response time to the file
             for t in response_times:
                 f.write(f"{t:.6f}\n")
-            print(f"High-load test ({rps} RPS) complete. All response times saved to '{output_file}'.")
-            print(f"Average Response Time (for your information): {average_time:.6f}s")
+        print(f"Test complete. Average Response Time: {avg_time:.6f}s")
+
 
 
 # --- Main Execution ---
