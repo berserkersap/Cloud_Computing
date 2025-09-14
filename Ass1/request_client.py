@@ -80,43 +80,48 @@ async def run_high_load_test(server_url, output_file, rps, duration=60):
 
     payload = {"data": "high-load-test-string"}
     response_times = []
+    requests_sent = 0
+    requests_successful = 0
 
     async with aiohttp.ClientSession() as session:
         for second in range(duration):
-            # Launch 'rps' requests every second
+            # Fire rps requests this second
             tasks = [send_single_request(session, server_url, payload) for _ in range(rps)]
             results = await asyncio.gather(*tasks)
 
+            requests_sent += len(results)
             for _, d in results:
                 if d > 0:
                     response_times.append(d)
+                    requests_successful += 1
 
-            # Sleep until next second boundary
+            # Maintain ~1-second pace
             await asyncio.sleep(1)
 
-    # Write results
+    # --- Write output ---
     with open(output_file, 'w') as f:
         if not response_times:
             f.write("average_response_time=N/A (All requests failed)\n")
+            f.write(f"requests_sent={requests_sent}\n")
+            f.write(f"requests_successful={requests_successful}\n")
             return
 
         avg_time = sum(response_times) / len(response_times)
         if rps == 10000:
+            # Special case per professor’s requirement
             f.write(f"average_response_time={avg_time:.6f}\n")
+            f.write(f"requests_sent={requests_sent}\n")
+            f.write(f"requests_successful={requests_successful}\n")
         else:
             for t in response_times:
                 f.write(f"{t:.6f}\n")
-        print(f"Test complete. Average Response Time: {avg_time:.6f}s")
+            f.write(f"average_response_time={avg_time:.6f}\n")
+            f.write(f"requests_sent={requests_sent}\n")
+            f.write(f"requests_successful={requests_successful}\n")
 
-def worker():
-    asyncio.run(run_high_load_test(full_url, output_filename, rps))
-for _ in range(4):  # 4 threads
-    t = threading.Thread(target=worker)
-    t.start()
-    threads.append(t)
+    print(f"Test complete. Avg Response Time: {avg_time:.6f}s, Sent: {requests_sent}, Success: {requests_successful}")
 
-for t in threads:
-    t.join()
+
 
 
 # --- Main Execution ---
