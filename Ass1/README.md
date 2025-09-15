@@ -1,4 +1,6 @@
-Cloud Computing Assignment 1: Autoscaling Analysis (FASTAPI)
+# Cloud Computing Assignment 1: Autoscaling Analysis (FASTAPI)
+---
+
 This project uses the FastAPI framework to fulfill the assignment requirements, including specific output formats and a string reversal task.
 
 Application Overview
@@ -6,7 +8,8 @@ Server: A Python FastAPI application with one endpoint: /reverse (for string rev
 
 Client: An asynchronous Python script that takes the user's roll number and test parameters to generate the four required output files in the specified format.
 
-# Cloud\_Computing  Ass1 — README (Local Docker Swarm & Kubernetes)
+---
+# Local Docker Swarm & Kubernetes
 
 The below contains Step-by-step instructions to build, deploy, test and collect outputs for the assignment **locally** using **Docker Swarm** and **Kubernetes (Minikube / Docker Desktop)**.
 
